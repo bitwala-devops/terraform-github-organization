@@ -1,0 +1,52 @@
+# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+
+# User-specific stuff
+/.idea/**/workspace.xml
+/.idea/**/tasks.xml
+/.idea/**/usage.statistics.xml
+/.idea/**/dictionaries
+/.idea/**/shelf
+
+# Generated files
+/.idea/**/contentModel.xml
+
+/# Sensitive or high-churn files
+/.idea/**/dataSources/
+/.idea/**/dataSources.ids
+/.idea/**/dataSources.local.xml
+/.idea/**/sqlDataSources.xml
+/.idea/**/dynamic.xml
+/.idea/**/uiDesigner.xml
+/.idea/**/dbnavigator.xml
+
+# Gradle
+/.idea/**/gradle.xml
+/.idea/**/libraries
+
+# We do not want to commit these at the moment
+/.idea/inspectionProfiles
+/.idea/*.iml
+/.idea/*.xml
+
+# Ignored outputs from Terraform and Terragrunt
+.terraform/
+.terragrunt-cache/
+terraform.tfstate
+terraform.tfstate.backup
+terragrunt-backend.tf
+
+# By default Terraform provider lockfiles are generated specifically for the OS
+# platform on which `terraform init` was run. Locally, we develop on macOS while
+# Atlantis runs on Linux. The default behavior of Terraform provider locking
+# prevents Atlantis from successfully initializing a Terraform project.
+# Terraform allows cross-platform locking, though. We integrate this feature
+# using Terragrunt hooks.
+#
+# ref: https://github.com/gruntwork-io/terragrunt/issues/1527#issuecomment-778538268
+.terraform.lock.hcl
+
+# Node.js outputs (for use in our release workflow)
+/node_modules/
+
+#macOS
+.DS_Store

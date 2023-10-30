@@ -1,0 +1,101 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-if-release-needed:
+    runs-on: [ self-hosted, default ]
+    outputs:
+      bool: ${{ steps.is-release-needed.outputs.bool }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.ACTIONS_GITHUB_TOKEN }}
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+      - name: Setup Yarn
+        run: command -v yarn || npm install -g yarn
+      - name: Yarn
+        run: yarn
+        env:
+          GITHUB_USER: github-actions
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_GITHUB_TOKEN }}
+      - name: Is release needed?
+        id: "is-release-needed"
+        run: ./.scripts/is-release.sh
+
+  release:
+    runs-on: [ self-hosted, default ]
+    needs: "check-if-release-needed"
+    if: ${{ needs.check-if-release-needed.outputs.bool == 'true' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.ACTIONS_GITHUB_TOKEN }}
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+      - name: Setup Yarn
+        run: command -v yarn || npm install -g yarn
+      - name: Yarn
+        run: yarn
+        env:
+          GITHUB_USER: github-actions
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_GITHUB_TOKEN }}
+      - name: "Create release notes"
+        id: "create-release-notes"
+        run: ./.scripts/release-notes.sh
+      - name: Prepare semantic release
+        id: prepare-release
+        run: npm run prepare-release
+        env:
+          BUILD_AUTHOR: "github-actions"
+      # if you need to update additional files (readmes, docs, etc.) do it here
+      - name: update files if needed
+        run: |
+          git status
+          if ! git diff --exit-code; then
+            git add .
+            git commit -m "chore: Auto-update $(git diff --name-only | tr '\n' ' ') for ${{ steps.prepare-release.outputs.version }}"
+          fi
+      - name: update terraform docs
+        run: |
+          .scripts/update_docs.sh
+          git status
+          if ! git diff --exit-code; then
+              updated_modules=$(git diff --name-only | rev | cut -d '/' -f 2- | sort | uniq | rev)
+              for module in $updated_modules; do
+                  echo git add $module
+                  echo git commit -m "chore($module) Auto-update Terraform docs"
+              done
+          fi
+
+      - run: git push --atomic --follow-tags origin "$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')"
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.prepare-release.outputs.version }}
+          release_name: ${{ steps.prepare-release.outputs.version }}
+          draft: false
+          prerelease: false
+          body: |
+            ${{ env.RELEASE_NOTES }}

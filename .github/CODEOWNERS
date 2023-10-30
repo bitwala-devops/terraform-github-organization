@@ -1,0 +1,45 @@
+# https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
+
+# Each line is a file pattern followed by one or more owners.
+
+# These owners will be the default owners for everything in the repo. Unless a
+# later match takes precedence, these will be requested for review when someone
+# opens a pull request.
+#
+# Since Uwe has been the original designer of this repository, it is important
+# to include him in every review, so he can verify that we're following every
+# documented and undocumented design decisions, and best practices. Lukasz
+# and Daniel is currently sharing this role with Uwe, and should also be
+# knowledgeable about all conventions and best practices.
+* @bitwala-bank-devops/devops-maintainers
+
+# Business modules are Terraform root modules which we use in our production
+# and non-production environments. In addition to the primary designers of this
+# repository structure, we want one or more people from the DevOps & Tooling
+# squad to be notified and invited to review every change that is proposed.
+/business/* @bitwala-bank-devops/devops-maintainers
+
+# By extension, the same as for business modules applies to technology and
+# vendor modules as well.
+/vendor/*     @bitwala-bank-devops/devops-maintainers
+/technology/* @bitwala-bank-devops/devops-maintainers
+
+# Deprecated modules should no longer be used in new configurations, but they
+# contain a large portion of the configuration of environments which have been
+# created by the DevOps & Tooling squad before the start of this project. Thus,
+# the ownership of these modules lies mostly within their own responsibility.
+/deprecated/* @bitwala-bank-devops/devops-maintainers
+
+# The core-banking modules
+/business/workloads-core-banking-* @bitwala-bank-devops/devops-maintainers
+
+# The infrastructure security related modules.
+/business/security-* @bitwala-bank-devops/devops-maintainers @bitwala-bank-devops/security-maintainers
+
+# Technology modules that are used by Information Security.
+/technology/aws/jenkins         @bitwala-bank-devops/devops-maintainers @bitwala-bank-devops/security-maintainers
+/technology/aws/sonarqube       @bitwala-bank-devops/devops-maintainers @bitwala-bank-devops/security-maintainers
+/technology/aws/sso-*           @bitwala-bank-devops/devops-maintainers @bitwala-bank-devops/security-maintainers
+/technology/aws/organizations   @bitwala-bank-devops/devops-maintainers @bitwala-bank-devops/security-maintainers
+/technology/aws/organizations-* @bitwala-bank-devops/devops-maintainers @bitwala-bank-devops/security-maintainers
+/technology/aws/iam-*           @bitwala-bank-devops/devops-maintainers @bitwala-bank-devops/security-maintainers

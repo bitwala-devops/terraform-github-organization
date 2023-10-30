@@ -1,0 +1,30 @@
+{
+  "name": "@bitwala-bank-devops/terraform-root-github-organization",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "release": "standard-version",
+    "test": "$(npm bin)/run-p -l --aggregate-output test:*",
+    "prepare-release": ".scripts/prepare-release.sh",
+    "standard-version": "standard-version",
+    "test:misc-checks": "time .scripts/misc_checks.sh",
+    "test:shellcheck": "time .scripts/shellcheck.sh",
+    "test:yamllint": "time .scripts/yamllint.sh",
+    "test:tflint": "time .scripts/tflint.sh",
+    "test:checkov": "time .scripts/checkov.sh",
+    "test:terraform-validate": "time .scripts/terraform-validate.sh",
+    "test:terraform-fmt": "time .scripts/terraform-fmt.sh",
+    "delete-tf-locks": "find . -name '.terraform.lock.hcl' -type f -prune -exec rm '{}' +",
+    "install": "if [[ \"$CI\" != \"true\" ]]; then cp .git-hooks/* .git/hooks/; fi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.bitwa.la/bitwala-bank-devops/terraform-root-github-organization.git"
+  },
+  "author": "Bitwala DevOps <devops@bitwala.com>",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "npm-run-all": "^4.1.5",
+    "standard-version": "^9.3.0"
+  }
+}

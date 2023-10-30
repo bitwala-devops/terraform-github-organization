@@ -1,0 +1,24 @@
+extends: default
+
+rules:
+  document-start: disable
+  empty-lines:
+    level: warning
+  line-length: disable
+  brackets:
+    forbid: false
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+
+  # These start with the magic comment "#cloud-init", and it might break the
+  # user data script handling if we change this
+  comments:
+    ignore: |
+      /technology/aws/jenkins/master/files/jenkins_install.yaml
+      /technology/aws/sonarqube/server/files/sonar_install.yaml
+
+# These files are not maintained by us
+ignore: |
+  .terraform/
+  /vendor/
+  /node_modules/
