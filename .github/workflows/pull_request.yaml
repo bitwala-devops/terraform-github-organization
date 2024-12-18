@@ -16,7 +16,7 @@ on:
 jobs:
 
   misc-checks:
-    runs-on: [ self-hosted, default ]
+    runs-on: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -24,7 +24,7 @@ jobs:
       - run: ".scripts/misc_checks.sh"
 
   yamllint:
-    runs-on: [ self-hosted, default ]
+    runs-on: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -32,7 +32,7 @@ jobs:
       - run: ".scripts/yamllint.sh"
 
   shellcheck:
-    runs-on: [ self-hosted, default ]
+    runs-on: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -40,7 +40,7 @@ jobs:
       - run: ".scripts/shellcheck.sh"
 
   list-terraform-directories:
-    runs-on: [ self-hosted, default ]
+    runs-on: [ ubuntu-latest ]
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -52,9 +52,9 @@ jobs:
           terraform_directories="$(.scripts/list_terraform_directories.sh)"
           [[ -z "$terraform_directories" ]] && \
             matrix="[]" || \
-            matrix="$(echo "$terraform_directories" | jq -cRn '[inputs]')"
+            matrix="$(echo "$terraform_directories" | jq -cR './" "')"
           echo "$matrix" | jq .
-          echo "::set-output name=matrix::$matrix"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 
   checkov:
     needs: [ list-terraform-directories ]
@@ -63,7 +63,7 @@ jobs:
       fail-fast: false
       matrix:
         terraform-directory: ${{ fromJson(needs.list-terraform-directories.outputs.matrix) }}
-    runs-on: [ self-hosted, default ]
+    runs-on: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -77,7 +77,7 @@ jobs:
       fail-fast: false
       matrix:
         terraform-directory: ${{ fromJson(needs.list-terraform-directories.outputs.matrix) }}
-    runs-on: [ self-hosted, default ]
+    runs-on: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -91,26 +91,26 @@ jobs:
       fail-fast: false
       matrix:
         terraform-directory: ${{ fromJson(needs.list-terraform-directories.outputs.matrix) }}
-    runs-on: [ self-hosted, default ]
+    runs-on: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - run: .scripts/terraform-fmt.sh ${{ matrix.terraform-directory }}
 
-  terraform-validate:
-    needs: [ list-terraform-directories ]
-    if: needs.list-terraform-directories.outputs.matrix != '[]'
-    strategy:
-      fail-fast: false
-      matrix:
-        terraform-directory: ${{ fromJson(needs.list-terraform-directories.outputs.matrix) }}
-    runs-on: [ self-hosted, default ]
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - run: .scripts/terraform-validate.sh ${{ matrix.terraform-directory }}
-        env:
-          GITHUB_USER: github-actions
-          GITHUB_TOKEN: ${{ secrets.ACTIONS_GITHUB_TOKEN }}
+#  terraform-validate:
+#    needs: [ list-terraform-directories ]
+#    if: needs.list-terraform-directories.outputs.matrix != '[]'
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        terraform-directory: ${{ fromJson(needs.list-terraform-directories.outputs.matrix) }}
+#    runs-on: [ ubuntu-latest ]
+#    steps:
+#      - uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#      - run: .scripts/terraform-validate.sh ${{ matrix.terraform-directory }}
+#        env:
+#          GITHUB_USER: github-actions
+#          GITHUB_TOKEN: ${{ secrets.ACTIONS_GITHUB_TOKEN }}

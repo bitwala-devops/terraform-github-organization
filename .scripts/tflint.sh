@@ -2,7 +2,7 @@
 GIT_ROOT_DIRECTORY="$(git rev-parse --show-toplevel)"
 SCRIPT_DIRECTORY="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
-TFLINT_BUNDLE_VERSION="v0.39.2.0"
+TFLINT_BUNDLE_VERSION="v0.46.0.0"
 
 DEFAULT_TFLINT_LOGLEVEL="error"
 
@@ -14,10 +14,11 @@ fi
 
 main() {
   docker run --rm \
+    -e TFLINT_LOG="$TFLINT_LOGLEVEL" \
     -v "${GIT_ROOT_DIRECTORY}:/data" \
     -w "/data" \
     "ghcr.io/terraform-linters/tflint-bundle:${TFLINT_BUNDLE_VERSION}" \
-    --loglevel="$TFLINT_LOGLEVEL" "${1}"
+    --chdir "${1}"
 }
 
 if [ "${BASH_SOURCE[0]}" -ef "$0" ]; then
@@ -30,6 +31,6 @@ if [ "${BASH_SOURCE[0]}" -ef "$0" ]; then
 
     # shellcheck disable=SC2086 # intentional word splitting
     printf '%s\n' $TERRAFORM_DIRECTORIES | xargs $replsize -n 1 -P 8 -I '{}' \
-      bash -c "docker run --rm -v ${GIT_ROOT_DIRECTORY}:/data -w /data ghcr.io/terraform-linters/tflint-bundle:${TFLINT_BUNDLE_VERSION} --loglevel=${TFLINT_LOGLEVEL} {} || exit 255"
+      bash -c "docker run --rm -e TFLINT_LOG=$TFLINT_LOGLEVEL -v ${GIT_ROOT_DIRECTORY}:/data -w /data ghcr.io/terraform-linters/tflint-bundle:${TFLINT_BUNDLE_VERSION} --chdir {} || exit 255"
   fi
 fi

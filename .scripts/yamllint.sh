@@ -2,7 +2,7 @@
 GIT_ROOT_DIRECTORY="$(git rev-parse --show-toplevel)"
 SCRIPT_DIRECTORY="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
-# shellcheck source=/dev/null # reason: skipping source check, as the source 
+# shellcheck source=/dev/null # reason: skipping source check, as the source
 # is checked anyway
 source "$SCRIPT_DIRECTORY/utils.sh"
 
@@ -13,10 +13,16 @@ check_yamllint() {
   local FILES=$@
 
   xargs --help &>/dev/null && replsize="" || replsize="-S 100000"
-
-  # shellcheck disable=SC2086 # intentional word splitting
-  printf '%s\n' $FILES | xargs $replsize -n 1 -P 8 -I '{}' \
-    bash -c "docker run --rm -v ${GIT_ROOT_DIRECTORY}:/workdir:ro -w /workdir cytopia/yamllint:1.26 '{}' || exit 255"
+  command -v yamllint
+  if command -v yamllint; then
+     # shellcheck disable=SC2086 # intentional word splitting
+     printf '%s\n' $FILES | xargs $replsize -n 1 -P 8 -I '{}' \
+        bash -c "yamllint '{}' || exit 255"
+  else
+    # shellcheck disable=SC2086 # intentional word splitting
+    printf '%s\n' $FILES | xargs $replsize -n 1 -P 8 -I '{}' \
+        bash -c "docker run --rm -v ${GIT_ROOT_DIRECTORY}:/workdir:ro -w /workdir cytopia/yamllint:1.26 '{}' || exit 255"
+  fi
 }
 
 main() {
