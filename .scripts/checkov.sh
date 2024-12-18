@@ -2,7 +2,7 @@
 GIT_ROOT_DIRECTORY="$(git rev-parse --show-toplevel)"
 SCRIPT_DIRECTORY="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
-CHECKOV_VERSION="2.0.477"
+CHECKOV_VERSION="3.2.341"
 
 main() {
   docker run --rm \

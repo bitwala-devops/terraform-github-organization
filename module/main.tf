@@ -1,11 +1,7 @@
-locals {
-  token = data.aws_ssm_parameter.token.value
-}
-
 module "github_repository" {
   for_each = var.repositories
 
-  source = "git@github.bitwa.la:bitwala-bank-devops/infrastructure-modules//technology/github/repository?ref=v5.211.0"
+  source = "../modules//repository"
 
   name = each.key
 
@@ -25,4 +21,13 @@ module "github_repository" {
   pages                  = each.value.pages
   template               = each.value.template
   environments           = each.value.environments
+  rulesets               = each.value.rulesets
+}
+
+module "organization_rulesets" {
+  for_each = { for ruleset in var.organization_rulesets : ruleset.name => ruleset }
+  source   = "../modules//organization-ruleset"
+
+
+  ruleset = each.value
 }

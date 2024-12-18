@@ -8,7 +8,7 @@ source "$SCRIPT_DIRECTORY/utils.sh"
 DEFAULT_BRANCH="$(git remote show "$(git remote)" | grep 'HEAD branch' | cut -d ':' -f 2- | tr -d ' ')"
 
 main() {
-    (   
+    (
         ALL_TERRAFORM_DIRECTORIES="$(find . \
             -path '*/.terragrunt-cache/*' -prune -o \
             -path '*/.terraform/*' -prune -o \

@@ -9,6 +9,8 @@ rules:
     forbid: false
     min-spaces-inside: 0
     max-spaces-inside: 1
+  truthy:
+    check-keys: false
 
   # These start with the magic comment "#cloud-init", and it might break the
   # user data script handling if we change this
