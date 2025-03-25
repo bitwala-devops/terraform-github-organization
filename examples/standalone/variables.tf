@@ -65,9 +65,12 @@ variable "repositories" {
     }))
 
     environments = optional(map(object({
-      wait_timer      = optional(number)
-      branch_patterns = optional(list(string))
-      secrets         = optional(map(any))
+      wait_timer          = optional(number)
+      branch_patterns     = optional(list(string))
+      tag_patterns        = optional(list(string))
+      prevent_self_review = optional(bool)
+      secrets             = optional(map(any))
+      variables           = optional(map(any))
 
       reviewers = optional(object({
         teams = optional(list(string))

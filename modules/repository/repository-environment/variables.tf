@@ -17,6 +17,13 @@ variable "wait_timer" {
   default = null
 }
 
+variable "prevent_self_review" {
+  description = "Set to `true` to prevent self review."
+
+  type    = bool
+  default = false
+}
+
 variable "reviewers" {
   description = <<-EOT
   An object with the teams or users that are going to be reviewers for the environment:
@@ -41,9 +48,23 @@ variable "branch_patterns" {
   type    = list(string)
   default = []
 }
+variable "tag_patterns" {
+  description = "The name patterns that tags must match in order to deploy to the environment."
+
+  type    = list(string)
+  default = []
+}
 
 variable "secrets" {
   description = "Map of secrets that will be created in the repository environment to be accessed only there."
+
+  type    = map(any)
+  default = null
+}
+
+
+variable "variables" {
+  description = "Map of variables that will be created in the repository environment to be accessed only there."
 
   type    = map(any)
   default = null

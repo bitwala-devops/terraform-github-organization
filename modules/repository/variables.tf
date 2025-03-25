@@ -176,14 +176,16 @@ An object describing the environment(s) that the repository will have, and their
 EOF
 
   type = map(object({
-    wait_timer = optional(number)
-
+    wait_timer          = optional(number)
+    prevent_self_review = optional(bool)
     reviewers = optional(object({
       teams = optional(list(string))
       users = optional(list(string))
     }))
     branch_patterns = optional(list(string))
+    tag_patterns    = optional(list(string))
     secrets         = optional(map(any))
+    variables       = optional(map(any))
   }))
   default = null
 }

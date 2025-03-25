@@ -58,12 +58,15 @@ module "environments" {
 
   source = "./repository-environment//"
 
-  name            = each.key
-  repository_name = github_repository.this.name
-  wait_timer      = each.value.wait_timer
-  reviewers       = each.value.reviewers
-  secrets         = each.value.secrets
-  branch_patterns = each.value.branch_patterns
+  name                = each.key
+  repository_name     = github_repository.this.name
+  wait_timer          = each.value.wait_timer
+  reviewers           = each.value.reviewers
+  secrets             = each.value.secrets
+  variables           = each.value.variables
+  branch_patterns     = each.value.branch_patterns
+  tag_patterns        = each.value.tag_patterns
+  prevent_self_review = each.value.prevent_self_review
 }
 
 module "rulesets" {
