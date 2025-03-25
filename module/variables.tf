@@ -23,7 +23,7 @@ variable "repositories" {
   * template - An object describing the repository's template configuration, if one is used. The object attributes are as follows:
     * owner - Name of the owner of the template used to create the new repository. (Required)
     * repository - Name of the repository where to use as template. (Required)
-  * environments - An object describing the environment(s) that the repository will have, and their configuration, including secrets.
+  * environments - An object describing the environment(s) that the repository will have, and their configuration, including secrets..
   EOT
 
   type = map(object({
@@ -53,9 +53,12 @@ variable "repositories" {
     }))
 
     environments = optional(map(object({
-      wait_timer      = optional(number)
-      branch_patterns = optional(list(string))
-      secrets         = optional(map(any))
+      wait_timer          = optional(number)
+      branch_patterns     = optional(list(string))
+      tag_patterns        = optional(list(string))
+      prevent_self_review = optional(bool)
+      secrets             = optional(map(any))
+      variables           = optional(map(any))
 
       reviewers = optional(object({
         teams = optional(list(string))
