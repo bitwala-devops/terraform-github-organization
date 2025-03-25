@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3](https://github.com/bitwala-devops/terraform-github-organization/compare/v0.0.2...v0.0.3) (2025-03-25)
+
+
+### Features
+
+* add support for tag patterns, variables, and self-review prevention ([de5a9c9](https://github.com/bitwala-devops/terraform-github-organization/commit/de5a9c910f2a9bc067ba62798b0fc3913605898a))
+
 ### 0.0.2 (2024-12-18)
 
 
