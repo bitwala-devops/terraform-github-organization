@@ -277,3 +277,9 @@ variable "rulesets" {
   }))
   default = null
 }
+
+variable "variables" {
+  description = "An object describing the repository's GitHub Actions repository variables."
+  type        = map(string)
+  default     = {}
+}
