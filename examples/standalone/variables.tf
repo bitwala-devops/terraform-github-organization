@@ -64,6 +64,8 @@ variable "repositories" {
       repository = string
     }))
 
+    variables = optional(map(string), {})
+
     environments = optional(map(object({
       wait_timer          = optional(number)
       branch_patterns     = optional(list(string))

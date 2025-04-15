@@ -52,6 +52,14 @@ resource "github_repository" "this" {
     prevent_destroy = true
   }
 }
+resource "github_actions_variable" "this" {
+  for_each = var.variables
+
+  repository = github_repository.this.name
+
+  variable_name = each.key
+  value         = each.value
+}
 
 module "environments" {
   for_each = var.environments == null ? {} : var.environments

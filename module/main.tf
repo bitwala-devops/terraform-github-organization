@@ -20,6 +20,7 @@ module "github_repository" {
   visibility             = each.value.visibility
   pages                  = each.value.pages
   template               = each.value.template
+  variables              = each.value.variables
   environments           = each.value.environments
   rulesets               = each.value.rulesets
 }
