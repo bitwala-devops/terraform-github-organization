@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "release": "standard-version",
-    "test": "$(npm bin)/run-p -l --aggregate-output test:*",
+    "test": "$(npm root)/.bin/run-p -l --aggregate-output test:*",
     "prepare-release": ".scripts/prepare-release.sh",
     "standard-version": "standard-version",
     "test:misc-checks": "time .scripts/misc_checks.sh",
