@@ -275,7 +275,7 @@ variable "rulesets" {
       })), [])
     }), null)
   }))
-  default = null
+  default = []
 }
 
 variable "variables" {

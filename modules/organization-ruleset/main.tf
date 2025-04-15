@@ -126,7 +126,7 @@ resource "github_organization_ruleset" "this" {
   }
 
   dynamic "rules" {
-    for_each = lookup(var.ruleset, "rules") != null ? { _ = "_" } : {}
+    for_each = lookup(var.ruleset, "rules", null) != null ? { _ = "_" } : {}
     content {
       creation                = var.ruleset.rules.creation
       deletion                = var.ruleset.rules.deletion
