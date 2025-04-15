@@ -15,14 +15,23 @@
     "test:terraform-validate": "time .scripts/terraform-validate.sh",
     "test:terraform-fmt": "time .scripts/terraform-fmt.sh",
     "delete-tf-locks": "find . -name '.terraform.lock.hcl' -type f -prune -exec rm '{}' +",
-    "install": "if [[ \"$CI\" != \"true\" ]]; then cp .git-hooks/* .git/hooks/; fi"
+    "install": "if [[ $CI == true ]]; then npm run install-ci; else time ./install.sh; fi",
+    "install-dev": "npm install --omit=optional",
+    "install-ci": "npm install --include=dev --ignore-scripts",
+    "r": "npm run reup",
+    "r-f": "npm run reup-force",
+    "reup": "peru reup",
+    "reup-force": "peru reup --force",
+    "s": "npm run sync",
+    "s-f": "npm run sync-force",
+    "sync": "peru sync",
+    "sync-force": "peru sync --force"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/bitwala-devops/terraform-github-organization.git"
   },
   "author": "Bitwala DevOps <devops@bitwala.com>",
-  "license": "UNLICENSED",
   "devDependencies": {
     "npm-run-all": "^4.1.5",
     "standard-version": "^9.3.0"

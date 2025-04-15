@@ -1,31 +1,30 @@
 #!/bin/bash
 
-changed() {
-  echo "# ${FUNCNAME[0]} $*"
-
-  if [[ $# -ne 2 ]]; then
-    echo "illegal number of parameters"
-    echo "Usage"
-    echo "  ./bin/changed.sh PATH_TO_CHECK ORIGIN"
-    echo "    PATH_TO_CHECK : Path to compare"
-    echo "    ORIGIN : Origin branch name to compare"
-  fi
-
-  local PATH_TO_CHECK=${1-'PLEASE_DEFINE_PATH_TO_CHECK'}
-  local ORIGIN=${2-'PLEASE_DEFINE_ORIGIN_BRANCH_TO_COMPARE'}
-
-  local CHANGED
-
-  echo "Path to check: ${PATH_TO_CHECK}"
-  echo "Origin: ${ORIGIN}"
-
-  CHANGED="$(git diff --name-only --no-color "origin/${ORIGIN}..." -- "${PATH_TO_CHECK}")"
-
-  if [ -z "$CHANGED" ]; then
-    echo "There is no change for ${PATH_TO_CHECK} compared to ${ORIGIN}."
-    return 1
+# Determine xargs replacement size parameter
+get_xargs_replsize() {
+  if xargs --help &>/dev/null; then
+    echo ""
   else
-    echo "${PATH_TO_CHECK} is changed"
-    return 0
+    echo "-S 100000"
+  fi
+}
+
+os_detect() {
+  case "$(uname)" in
+  Linux*) echo "Linux" ;;
+  Darwin*) echo "MacOS" ;;
+  CYGWIN* | MINGW*) echo "Windows" ;;
+  *) echo "Unknown" ;;
+  esac
+}
+
+get_architecture() {
+  local architecture
+  architecture="$(uname -m)"
+
+  if [[ "${architecture}" == "x86_64" ]]; then
+    echo "amd64"
+  else
+    echo "${architecture}"
   fi
 }

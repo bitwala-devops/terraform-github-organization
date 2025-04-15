@@ -1,59 +1,113 @@
 #!/bin/bash
 
+# Constants
+readonly DOCKER_IMAGE="koalaman/shellcheck-alpine:latest"
+readonly EXCLUDED_DIRS=(
+  '.git'
+  '.terragrunt-cache'
+  '.terraform'
+  'node_modules'
+  '.peru'
+  '.peru-deps'
+)
+MAX_PARALLEL_JOBS=$(nproc 2>/dev/null || echo "8")
+readonly MAX_PARALLEL_JOBS
+
+# Directory setup
 GIT_ROOT_DIRECTORY="$(git rev-parse --show-toplevel)"
+readonly GIT_ROOT_DIRECTORY
 SCRIPT_DIRECTORY="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+readonly SCRIPT_DIRECTORY
 
-# shellcheck source=/dev/null # reason: skipping source check, as the source
-# is checked anyway
-source "$SCRIPT_DIRECTORY/utils.sh"
+if [[ ! -f "$SCRIPT_DIRECTORY/check_changed.sh" ]]; then
+  echo "Error: 'check_changed.sh' file not found in the current directory."
+  exit 1
+fi
 
-DEFAULT_BRANCH=$(git remote show "$(git remote)" | awk '/HEAD branch/ {print $NF}' | tr -d ' ')
+# shellcheck source=/dev/null
+source "$SCRIPT_DIRECTORY/check_changed.sh"
 
-check_shellcheck() {
-  local FILES=$*
-  docker pull koalaman/shellcheck-alpine:latest
+# Get default branch name
+get_default_branch() {
+  git remote show "$(git remote)" | awk '/HEAD branch/ {print $NF}' | tr -d ' '
+}
+
+# Run shellcheck using either local installation or Docker
+run_shellcheck() {
+  local files=$1
+  if command -v shellcheck; then
+    # shellcheck disable=SC2086
+    echo $files | xargs -n 1 -P "${MAX_PARALLEL_JOBS}" shellcheck -x
+  else
+    echo "Local shellcheck not found, using Docker..."
+    docker pull "$DOCKER_IMAGE"
+    # shellcheck disable=SC2086
+    echo $files | xargs -n 1 -P "${MAX_PARALLEL_JOBS}" docker run --rm -w /mnt/ \
+      -v "${GIT_ROOT_DIRECTORY}:/mnt/:ro" \
+      "$DOCKER_IMAGE" shellcheck -x
+  fi
+}
+
+# Get list of shell script files to check
+get_shell_script_files() {
+  local exclude_pattern
+  #  exclude_pattern=$(printf " -type d -name '%s' -prune -o" "${EXCLUDED_DIRS[@]}")
+  for dir in "${EXCLUDED_DIRS[@]}"; do
+    exclude_pattern+=" -type d -name $dir -prune -o"
+  done
+
   # shellcheck disable=SC2086
-  echo $FILES | xargs -n 1 -P 8 docker run --rm -w /mnt/ -v "${GIT_ROOT_DIRECTORY}:/mnt/:ro" koalaman/shellcheck-alpine:latest shellcheck -x
+  find . $exclude_pattern \
+    -type f -print0 |
+    xargs -0 file |
+    grep --line-buffered 'shell script\|\/usr\/bin\/env bash script\|zsh script' |
+    cut -d ':' -f 1
 }
 
-main() {
-  local FILES=$*
+# Process changed files
+process_changed_files() {
+  local files=$1
+  local default_branch=$2
+  local changed_files=""
 
-  (
-    cd "${GIT_ROOT_DIRECTORY}" || exit 1
-
-    local CHANGED=""
-
-    if [ -n "$FILES" ]; then
-      if [ "$CHECK_CHANGED" = "false" ]; then
-        # shellcheck disable=SC2086
-        check_shellcheck $FILES
-      else
-        for file in $FILES; do
-          if changed "$file" "${DEFAULT_BRANCH}"; then
-            CHANGED="$CHANGED $file"
-          fi
-        done
-        if [ -n "$CHANGED" ]; then
-          # shellcheck disable=SC2086
-          check_shellcheck $CHANGED
-        fi
-      fi
-    else
-      echo "No files to check."
+  for file in $files; do
+    if changed "$file" "$default_branch"; then
+      changed_files="$changed_files $file"
     fi
-  )
+  done
+  echo "$changed_files"
 }
 
+# Main function
+main() {
+  local files=$*
+
+  (cd "${GIT_ROOT_DIRECTORY}" || {
+    echo "Error: Could not change to git root directory"
+    exit 1
+  })
+
+  if [ -z "$files" ]; then
+    echo "No files to check."
+    return 0
+  fi
+
+  if [ "$CHECK_CHANGED" = "false" ]; then
+    run_shellcheck "$files"
+  else
+    local default_branch
+    default_branch=$(get_default_branch)
+    local changed_files
+    changed_files=$(process_changed_files "$files" "$default_branch")
+
+    if [ -n "$changed_files" ]; then
+      run_shellcheck "$changed_files"
+    fi
+  fi
+}
+
+# Script entry point
 if [ "${BASH_SOURCE[0]}" -ef "$0" ]; then
-  SHELL_SCRIPT_FILES="$(find . \
-    -type d -name '.git' -prune -o \
-    -type d -name '.terragrunt-cache' -prune -o \
-    -type d -name '.terraform' -prune -o \
-    -type d -name 'node_modules' -prune -o \
-    -type d -name '.peru' -prune -o \
-    -type d -name '.peru-deps' -prune -o \
-    -type d -name 'percona-server-mongodb-operator' -prune -o \
-    -type f -print0 | xargs -0 file | grep --line-buffered 'shell script\|\/usr\/bin\/env bash script\|zsh script' | cut -d ':' -f 1)"
+  SHELL_SCRIPT_FILES=$(get_shell_script_files)
   main "$SHELL_SCRIPT_FILES"
 fi

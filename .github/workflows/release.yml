@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  actions: read
+
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
@@ -13,20 +17,18 @@ jobs:
   check-if-release-needed:
     runs-on: [ ubuntu-latest ]
     outputs:
-      bool: ${{ steps.is-release-needed.outputs.bool }}
+      RELEASE: ${{ steps.is-release-needed.outputs.RELEASE }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup NodeJS
         uses: actions/setup-node@v2
         with:
-          node-version: 18
-      - name: Setup Yarn
-        run: command -v yarn || npm install -g yarn
-      - name: Yarn
-        run: yarn
+          node-version: 22
+      - name: npm install
+        run: npm run install-ci
       - name: Is release needed?
         id: "is-release-needed"
         run: ./.scripts/is-release.sh
@@ -34,20 +36,21 @@ jobs:
   release:
     runs-on: [ ubuntu-latest ]
     needs: "check-if-release-needed"
-    if: ${{ needs.check-if-release-needed.outputs.bool == 'true' }}
+    if: ${{ needs.check-if-release-needed.outputs.RELEASE == 'true' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
       - name: Setup NodeJS
         uses: actions/setup-node@v2
         with:
-          node-version: 18
-      - name: Setup Yarn
-        run: command -v yarn || npm install -g yarn
-      - name: Yarn
-        run: yarn
+          node-version: 22
+      - name: npm install
+        run: npm run install-ci
+      - run: git config --global user.name "github-actions"
+      - run: git config --global user.email "$(hostname)@noreply.github.com"
       - name: "Create release notes"
         id: "create-release-notes"
         run: ./.scripts/release-notes.sh
@@ -63,17 +66,6 @@ jobs:
           if ! git diff --exit-code; then
             git add .
             git commit -m "chore: Auto-update $(git diff --name-only | tr '\n' ' ') for ${{ steps.prepare-release.outputs.version }}"
-          fi
-      - name: update terraform docs
-        run: |
-          .scripts/update_docs.sh
-          git status
-          if ! git diff --exit-code; then
-              updated_modules=$(git diff --name-only | rev | cut -d '/' -f 2- | sort | uniq | rev)
-              for module in $updated_modules; do
-                  echo git add $module
-                  echo git commit -m "chore($module) Auto-update Terraform docs"
-              done
           fi
 
       - run: git push --atomic --follow-tags origin "$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')"

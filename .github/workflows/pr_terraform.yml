@@ -1,4 +1,4 @@
-name: 'Test PR'
+name: 'Test Terraform PR'
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -13,38 +13,15 @@ on:
       'synchronize',
     ]
 
+permissions: read-all
+
 jobs:
-
-  misc-checks:
-    runs-on: [ ubuntu-latest ]
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - run: ".scripts/misc_checks.sh"
-
-  yamllint:
-    runs-on: [ ubuntu-latest ]
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - run: ".scripts/yamllint.sh"
-
-  shellcheck:
-    runs-on: [ ubuntu-latest ]
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - run: ".scripts/shellcheck.sh"
-
   list-terraform-directories:
     runs-on: [ ubuntu-latest ]
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - id: set-matrix
@@ -65,7 +42,7 @@ jobs:
         terraform-directory: ${{ fromJson(needs.list-terraform-directories.outputs.matrix) }}
     runs-on: [ ubuntu-latest ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - run: .scripts/checkov.sh ${{ matrix.terraform-directory }}
@@ -79,7 +56,7 @@ jobs:
         terraform-directory: ${{ fromJson(needs.list-terraform-directories.outputs.matrix) }}
     runs-on: [ ubuntu-latest ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - run: .scripts/tflint.sh ${{ matrix.terraform-directory }}
@@ -93,24 +70,7 @@ jobs:
         terraform-directory: ${{ fromJson(needs.list-terraform-directories.outputs.matrix) }}
     runs-on: [ ubuntu-latest ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - run: .scripts/terraform-fmt.sh ${{ matrix.terraform-directory }}
-
-#  terraform-validate:
-#    needs: [ list-terraform-directories ]
-#    if: needs.list-terraform-directories.outputs.matrix != '[]'
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        terraform-directory: ${{ fromJson(needs.list-terraform-directories.outputs.matrix) }}
-#    runs-on: [ ubuntu-latest ]
-#    steps:
-#      - uses: actions/checkout@v3
-#        with:
-#          fetch-depth: 0
-#      - run: .scripts/terraform-validate.sh ${{ matrix.terraform-directory }}
-#        env:
-#          GITHUB_USER: github-actions
-#          GITHUB_TOKEN: ${{ secrets.ACTIONS_GITHUB_TOKEN }}

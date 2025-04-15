@@ -1,6 +1,6 @@
 #!/bin/bash
 
-npm run standard-version -- --skip.commit --skip.tag -i RELEASE_NOTES.md
+npm run commit-and-tag-version -- --skip.commit --skip.tag -i RELEASE_NOTES.md
 
 # shellcheck disable=SC2046 # intentional splitting
 git checkout $(git diff --name-only | tr '\n' ' ')

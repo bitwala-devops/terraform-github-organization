@@ -15,12 +15,11 @@ rules:
   # These start with the magic comment "#cloud-init", and it might break the
   # user data script handling if we change this
   comments:
-    ignore: |
-      /technology/aws/jenkins/master/files/jenkins_install.yaml
-      /technology/aws/sonarqube/server/files/sonar_install.yaml
+    require-starting-space: false
 
 # These files are not maintained by us
 ignore: |
-  .terraform/
+  /.terraform/
+  /.terragrunt-cache/
   /vendor/
   /node_modules/
