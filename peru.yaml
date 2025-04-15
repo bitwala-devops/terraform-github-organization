@@ -1,0 +1,58 @@
+imports:
+  #  rotate-deploy-keys|rotate-deploy-key: .scripts/
+  #  rotate-deploy-keys|encrypt-deploy-key: .scripts/
+  common-tools|src|scripts: .scripts/
+  common-tools|src|github-workflows|release-workflow: .github/workflows/
+  common-tools|src|github-workflows|pr-common-workflow: .github/workflows/
+  common-tools|src|github-workflows|pr-terraform-workflow: .github/workflows/
+  common-tools|src|idea-codestyles: .idea/codeStyles/
+  common-tools|src|editorconfig: ./
+  common-tools|src|yamllint: ./
+
+## github.com/leinad-sch/common-tools
+git module common-tools:
+  url: https://github.com/leinad-sch/common-tools.git
+  reup: v0.0.2
+  recursive: false
+  rev: 37aec8f5d7326e46dac80cdc9c64f4a77b61b16e
+
+rule src:
+  export: src/
+
+rule scripts:
+  export: scripts/
+
+rule github-workflows:
+  export: github/workflows/
+
+rule release-workflow:
+  pick: release.yml
+
+rule pr-common-workflow:
+  pick: pr_common.yml
+
+rule pr-terraform-workflow:
+  pick: pr_terraform.yml
+
+rule idea-codestyles:
+  export: idea/codeStyles/
+
+rule editorconfig:
+  pick: .editorconfig
+
+rule yamllint:
+  pick: .yamllint
+
+## github.com/sbellone/release-workflow-example
+#git module rotate-deploy-keys:
+#  #  url: https://github.com/sbellone/release-workflow-example.git
+#  url: https://github.com/leinad-sch/release-workflow-example.git
+#  reup: feat/shellcheck
+#  recursive: false
+#  rev: 92972d0b5775b8fdf9f6dd3db18b2debdec00408
+#
+#rule rotate-deploy-key:
+#  pick: rotate-deploy-key.sh
+#
+#rule encrypt-deploy-key:
+#  pick: encrypt-deploy-key.js
