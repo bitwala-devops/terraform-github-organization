@@ -1,6 +1,14 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## [0.0.4](https://github.com/bitwala-devops/terraform-github-organization/compare/v0.0.3...v0.0.4) (2025-04-16)
+
+
+### Features
+
+* add support for GitHub Actions repository variables ([c3eb243](https://github.com/bitwala-devops/terraform-github-organization/commit/c3eb243609931b6e5fc16d3501bf6905ae0bdf6e))
+* fix npm scripts ([047e75f](https://github.com/bitwala-devops/terraform-github-organization/commit/047e75f59559286d78395c84aa6d6af2999bf2c9))
 
 ### [0.0.3](https://github.com/bitwala-devops/terraform-github-organization/compare/v0.0.2...v0.0.3) (2025-03-25)
 
