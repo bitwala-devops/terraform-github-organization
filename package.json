@@ -36,6 +36,7 @@
     "url": "https://github.com/bitwala-devops/terraform-github-organization.git"
   },
   "author": "Bitwala DevOps <devops@bitwala.com>",
+  "license": "MPL-2.0",
   "dependencies": {},
   "optionalDependencies": {
     "commit-and-tag-version": "^12.5.0"
