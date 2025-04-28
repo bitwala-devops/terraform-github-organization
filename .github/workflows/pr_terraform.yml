@@ -13,6 +13,10 @@ on:
       'synchronize',
     ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions: read-all
 
 jobs:
@@ -69,8 +73,38 @@ jobs:
       matrix:
         terraform-directory: ${{ fromJson(needs.list-terraform-directories.outputs.matrix) }}
     runs-on: [ ubuntu-latest ]
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: .scripts/terraform-fmt.sh ${{ matrix.terraform-directory }}
+          ref: "${{ github.head_ref }}"
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+      - run: .scripts/terraform-fmt.sh ${{ matrix.terraform-directory }} || echo $?
+      - name: update files if needed
+        env:
+          head_ref: ${{ github.head_ref }}
+        run: .scripts/update-files.sh "${{ matrix.terraform-directory }}" "${head_ref}"
+
+  terraform-docs:
+    needs: [ list-terraform-directories ]
+    if: needs.list-terraform-directories.outputs.matrix != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        terraform-directory: ${{ fromJson(needs.list-terraform-directories.outputs.matrix) }}
+    runs-on: [ ubuntu-latest ]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: "${{ github.head_ref }}"
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+      - run: .scripts/generate_terraform_docs.sh ${{ matrix.terraform-directory }}
+      - name: update files if needed
+        env:
+          head_ref: ${{ github.head_ref }}
+        run: .scripts/update-files.sh "${{ matrix.terraform-directory }}" "${head_ref}"

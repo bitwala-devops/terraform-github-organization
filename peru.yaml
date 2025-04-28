@@ -12,9 +12,9 @@ imports:
 ## github.com/leinad-sch/common-tools
 git module common-tools:
   url: https://github.com/leinad-sch/common-tools.git
-  reup: v0.0.2
+  reup: v0.0.3
   recursive: false
-  rev: 37aec8f5d7326e46dac80cdc9c64f4a77b61b16e
+  rev: 97e99b5c054593097a59ca2f4a07a9b3afc0b4c0
 
 rule src:
   export: src/
